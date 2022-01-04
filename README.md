@@ -6,11 +6,11 @@ The url of the keepass entry should be: ssh://test.com without any username and 
 
 Installation:
 - Install WSL (tested with wsl2, ubuntu 20), start bash and install sshpass (sudo apt-get install sshpass)
-- Edit or empty the ConEmu path in parameter below to adapt it to your current configuration or to disable it
+- Edit or empty the ConEmu path in sshhandler.vbs to adapt it to your current configuration or to disable it
 - Save this .vbs on your PC like c:\script\sshhandler.vbs 
-- Uncomment debugging line below (line 89) for debugging
+- Uncomment debugging line below (line 89) in sshhandler.vbs for debugging
 - Test it with in cmd with "cscript c:\script\sshhandler.vbs ssh://root:test@www.google.com:80"
-- Keepass URL Override: cmd://wscript.exe C:\Script\sshhandler.vbs {URL:SCM}://{USERNAME}:{PASSWORD}@{URL:HOST}:{T-REPLACE-RX:/{URL:PORT}/-1/22/}
-- Optional: Add cyphers at the of the file /etc/ssh/ssh_config (test witch "ssh -Q cipher | tr '\n' ',' | sed 's/,/, /g'"
+- In Keepass modify the URL Override with: cmd://wscript.exe C:\script\sshhandler.vbs {URL:SCM}://{USERNAME}:{PASSWORD}@{URL:HOST}:{T-REPLACE-RX:/{URL:PORT}/-1/22/}
+- Optional in WSL2: Add cyphers at the of the file /etc/ssh/ssh_config (test witch "ssh -Q cipher | tr '\n' ',' | sed 's/,/, /g'"
   - KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
   - Ciphers +aes128-cbc,3des-cbc 

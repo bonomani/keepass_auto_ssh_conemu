@@ -1,5 +1,5 @@
 Keepass_auto_ssh_conemu
-Keepass auto-login with ssh in ConEmu (use wsl2, bash, sshpass)
+- ssh auto-login from Keepass (url open) with the use of wsl2, bash, sshpass and conemu
 
 The aim of this script is to execute a login from keepass with current user/pass automaticaly:
 The url of the keepass entry should be: ssh://test.com without any username and password as they will be added automatically. 

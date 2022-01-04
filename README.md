@@ -12,5 +12,5 @@ Installation:
 - Test it with in cmd with "cscript c:\script\sshhandler.vbs ssh://root:test@www.google.com:80"
 - Keepass URL Override: cmd://wscript.exe C:\Script\sshhandler.vbs {URL:SCM}://{USERNAME}:{PASSWORD}@{URL:HOST}:{T-REPLACE-RX:/{URL:PORT}/-1/22/}
 - Optional: Add cyphers at the of the file /etc/ssh/ssh_config (test witch "ssh -Q cipher | tr '\n' ',' | sed 's/,/, /g'"
-  KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
-  Ciphers +aes128-cbc,3des-cbc 
+  - KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
+  - Ciphers +aes128-cbc,3des-cbc 

@@ -1,12 +1,12 @@
 ## Keepass_auto_ssh_conemu
 
-### Description:
+### Description
 Keepass_auto_ssh_conemu is a script designed to enable SSH auto-login from Keepass via URL open, leveraging WSL2, Bash, sshpass, and ConEmu.
 
-### Aim:
+### Aim
 The script aims to execute a login from Keepass automatically, without requiring manual input of username and password. The Keepass entry's URL should be in the format `ssh://test.com` without any specified username and password, as they will be added automatically.
 
-### Installation:
+### Installation
 
 1. Install WSL (tested with WSL2, Ubuntu 20).
 2. Start Bash and install sshpass:

@@ -66,7 +66,7 @@ if login <> "" then
 	paramLogin = " -l " & login
 end if
 if (pwd <> "") and (protocol <> "telnet") then 
-	paramPwd = "sshpass -p " & pwd
+	paramPwd = "sshpass -p '" & pwd &"'"
 end if
 if port <> "" then 
 	paramPort = " -p " & port

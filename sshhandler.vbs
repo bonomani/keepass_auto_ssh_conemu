@@ -1,14 +1,16 @@
-' The aim of this script is to execute a login from keepass with current user/pass automaticaly:
-' the url of the keepass entry should be: ssh://test.com without any username and password as they will be added automatically. 
+' The aim of this script is to automatically execute an SSH login from KeePass using the current username and password.
+' The KeePass entry URL should be: ssh://test.com (without username or password, as they are added automatically).
 
 ' Installation:
-'   - Install WSL (tested with wsl2, ubuntu 20), start bash and install sshpass
-'   - Edit or empty the ConEmu path in parameter below to adapt it to your current configuration or to disable it
-'   - Save this .vbs on your PC like c:\script\sshhandler.vbs 
-'   - Uncomment debugging line below (line 89) for debugging
-'   - Test it with in cmd with "cscript c:\script\sshhandler.vbs ssh://root:test@www.google.com:80"
-'   - Keepass URL Override: cmd://wscript.exe C:\Script\sshhandler.vbs {URL:SCM}://{USERNAME}:{PASSWORD}@{URL:HOST}:{T-REPLACE-RX:/{URL:PORT}/-1/22/}
-'   - Optional: Add cyphers at the of the file /etc/ssh/ssh_config (test witch "ssh -Q cipher | tr '\n' ',' | sed 's/,/, /g'"
+'   - Install WSL (tested with WSL2, Ubuntu 20), start bash and install sshpass
+'   - Edit or empty the ConEmu path in the parameter below to adapt it to your configuration or to disable it
+'   - Save this .vbs file on your PC, for example: C:\script\sshhandler.vbs
+'   - Uncomment the debugging line below (line 87) for debugging
+'   - Test it in cmd with:
+'       cscript C:\script\sshhandler.vbs ssh://root:test@www.google.com:80
+'   - KeePass URL Override:
+'       cmd://wscript.exe C:\Script\sshhandler.vbs {URL:SCM}://{USERNAME}:{PASSWORD}@{URL:HOST}:{T-REPLACE-RX:/{URL:PORT}/-1/22/}
+'   - Optional: add ciphers in /etc/ssh/ssh_config (test with "ssh -Q cipher | tr '\n' ',' | sed 's/,/, /g'")
 '      - KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1
 '      - Ciphers +aes128-cbc,3des-cbc 
 
@@ -16,6 +18,7 @@
 ' Script Created by Bruno Manzoni Based on the putty script from Sebastien Biffi
 
 On Error Resume Next
+
 ' initialisation of variables
 logResult = "" ' Used for logging purpose during debug or in case of error. Log is a msgBox
 logIcon = 0 ' Icon of the MsgBox. By default: none
@@ -26,52 +29,59 @@ Set re = New RegExp
 re.Pattern = "^([^:]+)://(([^:]+)(:(.*))?@)?(([^/@:]+)(:([0-9]+))?)/?$"
 
 ' Check if only 1 parameter is passed to the script, else throw an error
-if Wscript.Arguments.Count = 1 then
+If Wscript.Arguments.Count = 1 Then
 	url = Wscript.Arguments(0)
-else
-	exitWithError("Please pass only 1 parameter to this script like:" & vbCrLf & "   - ssh://login:password@host:port " & vbCrLf & "login, password & port are optional")
-end if
+Else
+	exitWithError("Please pass only one parameter to this script:" & vbCrLf & "   - ssh://login:password@host:port " & vbCrLf & "login, password and port are optional")
+End If
 
 ' Check if the URL is valid, else throw an error
 If re.Test(url) Then
 	log("URL is valid: " & url)
 Else
-	exitWithError(url & " is NOT a valid URL" & vbCrLf & "Please pass only 1 parameter to this script like:" & vbCrLf & "   - ssh://login:password@host:port " & vbCrLf & "   - telnet://login@host:port" & vbCrLf & "login, password & port are optional")
+	exitWithError(url & " is not a valid URL" & vbCrLf & "Please pass a parameter like:" & vbCrLf & "   - ssh://login:password@host:port " & vbCrLf & "   - telnet://login@host:port" & vbCrLf & "login, password and port are optional")
 End If
 
 ' Find the putty parameters in the URL
 Set Matches = re.Execute(url)
+
 protocol = Matches.Item(0).Submatches(0)
 login = Matches.Item(0).Submatches(2)
 pwd = Matches.Item(0).Submatches(4)
 host = Matches.Item(0).Submatches(6)
 port = Matches.Item(0).Submatches(8)
+
 log("  host: " & host)
 log("  protocol: " & protocol)
 log("  port: " & port)
 log("  login: " & login)
 log("  pwd: " & pwd)
 
-if protocol = "ssh" then 
+If protocol = "ssh" Then 
 	paramProtocol = " ssh -o PreferredAuthentications=keyboard-interactive,password -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-else
-	exitWithError("Protocol: " & protocol & " is not the ssh protocol.")
-end if 
-if host <> "" then 
+Else
+	exitWithError("Protocol: " & protocol & " is not supported (only ssh).")
+End If 
+
+If host <> "" Then 
 	paramHost = " " & host
-else
-	exitWithError("Host cannot bu null.")
-end if 
-if login <> "" then 
+Else
+	exitWithError("Host cannot be null.")
+End If 
+
+If login <> "" Then 
 	paramLogin = " -l " & login
-end if
-if (pwd <> "") and (protocol <> "telnet") then 
-	paramPwd = "sshpass -p '" & pwd &"'"
-end if
-if port <> "" then 
+End If
+
+If (pwd <> "") And (protocol <> "telnet") Then
+	pwd = Replace(pwd, "'", "'\''")
+	paramPwd = "SSHPASS='" & pwd & "' sshpass -e"
+End If
+
+If port <> "" Then 
 	paramPort = " -p " & port
 	port = ":" & port
-end if
+End If
 
 ' build the ssh command like:
 ' sshpass -p password ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l user -p 8080 www.google.com
@@ -96,29 +106,29 @@ objShell.Run sshCommand,1,False
 '   Error Output
 ' ****************
 ' Outputs a msgBox including the log and the error message
-function exitWithError(str)	
+Function exitWithError(str)
 	log(str)
-  logIcon = vbCritical
+	logIcon = vbCritical
 	logTitle = "Error"
-	outputLog()	
-	wscript.Quit
-end function
+	outputLog()
+	Wscript.Quit
+End Function
 
 ' ***********
 '   Logging 
 ' ***********
 ' Adds a message to the log String
-function log(str)
-	if logResult = "" then 
+Function log(str)
+	If logResult = "" Then 
 		logResult = str
-	else
+	Else
 		logResult = logResult & vbCrLf & str
-	end if
-end function
+	End If
+End Function
 ' Outputs a msgBox including the log String
-function outputLog()
-	if logResult <> "" then
+Function outputLog()
+	If logResult <> "" Then
 		MsgBox logResult, logIcon, logTitle
 		WScript.StdOut.Write(logResult)
-	end if
-end function
+	End If
+End Function
